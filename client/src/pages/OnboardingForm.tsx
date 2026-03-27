@@ -10,16 +10,16 @@ import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 const WEBHOOK_URL = "https://8765-i6abb8hfxkb9s3w04yftb-6c22dd36.us2.manus.computer/onboard";
 
 const steps = [
-  { id: 1, title: "Clinic Info", icon: "🏥" },
-  { id: 2, title: "Business Basics", icon: "📊" },
-  { id: 3, title: "Treatments & Pricing", icon: "💰" },
-  { id: 4, title: "Capacity", icon: "📅" },
-  { id: 5, title: "Brand Assets", icon: "🎨" },
-  { id: 6, title: "Billing", icon: "💳" },
+  { id: 1, label: "Clinic Info" },
+  { id: 2, label: "Business Basics" },
+  { id: 3, label: "Treatments & Pricing" },
+  { id: 4, label: "Capacity" },
+  { id: 5, label: "Brand Assets" },
+  { id: 6, label: "Billing" },
 ];
 
 export default function OnboardingForm() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // 0 = intro, 1-6 = steps
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -92,7 +92,7 @@ export default function OnboardingForm() {
 
   const handlePrevious = () => {
     setError("");
-    if (currentStep > 1) {
+    if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
   };
@@ -127,444 +127,491 @@ export default function OnboardingForm() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-8 text-center">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Welcome to Glow Marketing! 🚀</h2>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <CheckCircle2 className="w-16 h-16 text-yellow-600 mx-auto mb-6" />
+          <h2 className="text-3xl font-serif text-white mb-4">Welcome to Glow Marketing</h2>
+          <p className="text-gray-400 mb-6 leading-relaxed">
             Your onboarding has been initiated. Check your email for next steps and your Google Drive folder link.
           </p>
           <p className="text-sm text-gray-500">
             Our team will be in touch shortly to schedule your onboarding call.
           </p>
-        </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white p-4 py-12">
+    <div className="min-h-screen bg-black text-white p-4 py-12">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Glow Marketing</h1>
-          <p className="text-lg text-gray-600">Client Onboarding Form</p>
+        <div className="text-center mb-16">
+          <div className="text-sm tracking-widest text-gray-500 mb-8">— GLOW MARKETING —</div>
+          {currentStep === 0 ? (
+            <>
+              <h1 className="text-5xl md:text-6xl font-serif mb-6 leading-tight">
+                Let's build your <span className="text-yellow-600">growth system.</span>
+              </h1>
+              <p className="text-gray-400 max-w-lg mx-auto mb-8 leading-relaxed">
+                This form helps us understand your clinic, your goals, and your current situation so we can build a campaign that fits from day one. Fill it in at least 24 hours before your onboarding call so we arrive prepared.
+              </p>
+              <div className="flex flex-col md:flex-row justify-center gap-8 mb-12 text-sm">
+                <div>
+                  <div className="text-gray-500 mb-2">TIME</div>
+                  <div className="text-white">~12 minutes</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 mb-2">QUESTIONS</div>
+                  <div className="text-white">~25 questions</div>
+                </div>
+                <div>
+                  <div className="text-gray-500 mb-2">COVERS</div>
+                  <div className="text-white">Your full setup</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setCurrentStep(1)}
+                className="px-8 py-3 bg-yellow-600 hover:bg-yellow-700 text-black font-medium transition-colors"
+              >
+                START →
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="text-xs tracking-widest text-gray-500 mb-4">
+                STEP {currentStep} OF {steps.length}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-serif mb-4 leading-tight">
+                {currentStep === 1 && "What is the name of your clinic?"}
+                {currentStep === 2 && "Tell us about your business"}
+                {currentStep === 3 && "What treatments do you offer?"}
+                {currentStep === 4 && "What's your capacity?"}
+                {currentStep === 5 && "Show us your brand"}
+                {currentStep === 6 && "Billing information"}
+              </h1>
+              <p className="text-gray-400 text-sm">
+                {currentStep === 1 && "This helps us keep your submission organised on our end."}
+                {currentStep === 2 && "We want to understand your online presence and current setup."}
+                {currentStep === 3 && "This helps us know where to focus your first campaign."}
+                {currentStep === 4 && "So we don't over-promise on bookings."}
+                {currentStep === 5 && "So we create ads that match your aesthetic."}
+                {currentStep === 6 && "We'll need this to set up your account."}
+              </p>
+            </>
+          )}
         </div>
 
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex justify-between mb-4">
-            {steps.map((step) => (
-              <div
-                key={step.id}
-                className={`flex flex-col items-center cursor-pointer transition-all ${
-                  currentStep === step.id ? "opacity-100" : "opacity-50"
-                }`}
-                onClick={() => currentStep > step.id && setCurrentStep(step.id)}
-              >
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mb-2 transition-all ${
-                    currentStep >= step.id
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {step.icon}
-                </div>
-                <span className="text-xs font-medium text-center">{step.title}</span>
+        {/* Form */}
+        {currentStep > 0 && (
+          <div className="max-w-xl mx-auto mb-12">
+            {error && (
+              <div className="mb-6 p-4 bg-red-950 border border-red-800 rounded flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-red-400 text-sm">{error}</p>
               </div>
-            ))}
-          </div>
-          <div className="w-full bg-gray-200 h-1 rounded-full">
-            <div
-              className="bg-orange-500 h-1 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / 6) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Form Card */}
-        <Card className="p-8 mb-8">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-              <p className="text-red-700 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* Step 1: Clinic Info */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">🏥 Clinic Information</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="clinic_name">Clinic Name *</Label>
-                  <Input
-                    id="clinic_name"
-                    name="clinic_name"
-                    value={formData.clinic_name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Beauty Clinic Stockholm"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contact_name">Your Name *</Label>
-                  <Input
-                    id="contact_name"
-                    name="contact_name"
-                    value={formData.contact_name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., John Doe"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="e.g., john@clinic.se"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone / WhatsApp *</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="e.g., +46 70 220 79 66"
-                    className="mt-2"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Business Basics */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">📊 Business Basics</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="business_age">How long has the business been running? *</Label>
-                  <Select value={formData.business_age} onValueChange={(value) => handleSelectChange("business_age", value)}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="less_than_1">Less than 1 year</SelectItem>
-                      <SelectItem value="1_3">1-3 years</SelectItem>
-                      <SelectItem value="3_5">3-5 years</SelectItem>
-                      <SelectItem value="5_plus">5+ years</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="website_url">Website URL *</Label>
-                  <Input
-                    id="website_url"
-                    name="website_url"
-                    value={formData.website_url}
-                    onChange={handleInputChange}
-                    placeholder="https://..."
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="instagram_handle">Instagram Handle *</Label>
-                  <Input
-                    id="instagram_handle"
-                    name="instagram_handle"
-                    value={formData.instagram_handle}
-                    onChange={handleInputChange}
-                    placeholder="@yourhandle"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="facebook_page_url">Facebook Page URL</Label>
-                  <Input
-                    id="facebook_page_url"
-                    name="facebook_page_url"
-                    value={formData.facebook_page_url}
-                    onChange={handleInputChange}
-                    placeholder="https://facebook.com/..."
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="meta_status">Meta Business Manager Status *</Label>
-                  <Select value={formData.meta_status} onValueChange={(value) => handleSelectChange("meta_status", value)}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="have_access">I have access</SelectItem>
-                      <SelectItem value="need_help">I need help setting it up</SelectItem>
-                      <SelectItem value="dont_have">I don't have one</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="booking_system">Booking System *</Label>
-                  <Select value={formData.booking_system} onValueChange={(value) => handleSelectChange("booking_system", value)}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="calendly">Calendly</SelectItem>
-                      <SelectItem value="acuity">Acuity Scheduling</SelectItem>
-                      <SelectItem value="ghl">GoHighLevel</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Treatments & Pricing */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">💰 Treatments & Pricing</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="main_treatments">List your main treatments *</Label>
-                  <Textarea
-                    id="main_treatments"
-                    name="main_treatments"
-                    value={formData.main_treatments}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Botox, Fillers, Laser, Microneedling..."
-                    className="mt-2 min-h-24"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lead_treatment">Which treatment should we lead with first? *</Label>
-                  <Input
-                    id="lead_treatment"
-                    name="lead_treatment"
-                    value={formData.lead_treatment}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Botox"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lead_treatment_price">Price for the lead treatment *</Label>
-                  <Input
-                    id="lead_treatment_price"
-                    name="lead_treatment_price"
-                    value={formData.lead_treatment_price}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 2500 SEK"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="popular_package">Most popular package (what's included + price)</Label>
-                  <Textarea
-                    id="popular_package"
-                    name="popular_package"
-                    value={formData.popular_package}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Gold Package: Botox + Fillers + Laser - 5000 SEK"
-                    className="mt-2 min-h-20"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Capacity */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">📅 Capacity</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="practitioners">How many practitioners? *</Label>
-                  <Input
-                    id="practitioners"
-                    name="practitioners"
-                    type="number"
-                    value={formData.practitioners}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 3"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="max_clients_per_day">Max clients per day *</Label>
-                  <Input
-                    id="max_clients_per_day"
-                    name="max_clients_per_day"
-                    type="number"
-                    value={formData.max_clients_per_day}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 15"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="calendar_fullness">How full is your calendar right now? *</Label>
-                  <Select value={formData.calendar_fullness} onValueChange={(value) => handleSelectChange("calendar_fullness", value)}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="empty">Empty - lots of availability</SelectItem>
-                      <SelectItem value="moderate">Moderate - some availability</SelectItem>
-                      <SelectItem value="full">Full - limited availability</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Brand Assets */}
-          {currentStep === 5 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">🎨 Brand Assets</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="brand_colors">Brand Colours (hex codes or "see website") *</Label>
-                  <Input
-                    id="brand_colors"
-                    name="brand_colors"
-                    value={formData.brand_colors}
-                    onChange={handleInputChange}
-                    placeholder="e.g., #FF6B35, #FFB703 or 'see website'"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="logo_url">Upload your logo (URL)</Label>
-                  <Input
-                    id="logo_url"
-                    name="logo_url"
-                    value={formData.logo_url}
-                    onChange={handleInputChange}
-                    placeholder="https://..."
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="assets_drive_link">Google Drive link with photos, videos, before/afters</Label>
-                  <Input
-                    id="assets_drive_link"
-                    name="assets_drive_link"
-                    value={formData.assets_drive_link}
-                    onChange={handleInputChange}
-                    placeholder="https://drive.google.com/drive/folders/..."
-                    className="mt-2"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 6: Billing */}
-          {currentStep === 6 && (
-            <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900">💳 Billing Information</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="company_name">Registered Company Name *</Label>
-                  <Input
-                    id="company_name"
-                    name="company_name"
-                    value={formData.company_name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Beauty Clinic AB"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="org_number">Organization Number *</Label>
-                  <Input
-                    id="org_number"
-                    name="org_number"
-                    value={formData.org_number}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 556970-3050"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="billing_email">Billing Email *</Label>
-                  <Input
-                    id="billing_email"
-                    name="billing_email"
-                    type="email"
-                    value={formData.billing_email}
-                    onChange={handleInputChange}
-                    placeholder="e.g., billing@clinic.se"
-                    className="mt-2"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="billing_address">Billing Address *</Label>
-                  <Textarea
-                    id="billing_address"
-                    name="billing_address"
-                    value={formData.billing_address}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Strandvägen 1, 114 51 Stockholm, Sweden"
-                    className="mt-2 min-h-20"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-8 border-t">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              className="px-6"
-            >
-              ← Previous
-            </Button>
-
-            {currentStep === 6 ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="px-8 bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit & Start Onboarding 🚀"
-                )}
-              </Button>
-            ) : (
-              <Button
-                onClick={handleNext}
-                className="px-8 bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Next →
-              </Button>
             )}
-          </div>
-        </Card>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-600">
-          <p>Step {currentStep} of 6</p>
-        </div>
+            <div className="space-y-6">
+              {/* Step 1 */}
+              {currentStep === 1 && (
+                <>
+                  <div>
+                    <Label htmlFor="clinic_name" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      CLINIC / BUSINESS NAME *
+                    </Label>
+                    <Input
+                      id="clinic_name"
+                      name="clinic_name"
+                      value={formData.clinic_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Glow Aesthetics Stockholm"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contact_name" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      YOUR NAME *
+                    </Label>
+                    <Input
+                      id="contact_name"
+                      name="contact_name"
+                      value={formData.contact_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g. John Doe"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      EMAIL *
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="john@clinic.se"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      PHONE / WHATSAPP *
+                    </Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="+46 70 220 79 66"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Step 2 */}
+              {currentStep === 2 && (
+                <>
+                  <div>
+                    <Label htmlFor="business_age" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      HOW LONG HAS THE BUSINESS BEEN RUNNING? *
+                    </Label>
+                    <Select value={formData.business_age} onValueChange={(value) => handleSelectChange("business_age", value)}>
+                      <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-gray-700">
+                        <SelectItem value="less_than_1">Less than 1 year</SelectItem>
+                        <SelectItem value="1_3">1-3 years</SelectItem>
+                        <SelectItem value="3_5">3-5 years</SelectItem>
+                        <SelectItem value="5_plus">5+ years</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="website_url" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      WEBSITE URL *
+                    </Label>
+                    <Input
+                      id="website_url"
+                      name="website_url"
+                      value={formData.website_url}
+                      onChange={handleInputChange}
+                      placeholder="https://..."
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="instagram_handle" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      INSTAGRAM HANDLE *
+                    </Label>
+                    <Input
+                      id="instagram_handle"
+                      name="instagram_handle"
+                      value={formData.instagram_handle}
+                      onChange={handleInputChange}
+                      placeholder="@yourhandle"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="facebook_page_url" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      FACEBOOK PAGE URL
+                    </Label>
+                    <Input
+                      id="facebook_page_url"
+                      name="facebook_page_url"
+                      value={formData.facebook_page_url}
+                      onChange={handleInputChange}
+                      placeholder="https://facebook.com/..."
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="meta_status" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      META BUSINESS MANAGER STATUS *
+                    </Label>
+                    <Select value={formData.meta_status} onValueChange={(value) => handleSelectChange("meta_status", value)}>
+                      <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-gray-700">
+                        <SelectItem value="have_access">I have access</SelectItem>
+                        <SelectItem value="need_help">I need help setting it up</SelectItem>
+                        <SelectItem value="dont_have">I don't have one</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="booking_system" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      BOOKING SYSTEM *
+                    </Label>
+                    <Select value={formData.booking_system} onValueChange={(value) => handleSelectChange("booking_system", value)}>
+                      <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-gray-700">
+                        <SelectItem value="calendly">Calendly</SelectItem>
+                        <SelectItem value="acuity">Acuity Scheduling</SelectItem>
+                        <SelectItem value="ghl">GoHighLevel</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {/* Step 3 */}
+              {currentStep === 3 && (
+                <>
+                  <div>
+                    <Label htmlFor="main_treatments" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      LIST YOUR MAIN TREATMENTS *
+                    </Label>
+                    <Textarea
+                      id="main_treatments"
+                      name="main_treatments"
+                      value={formData.main_treatments}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Botox, Fillers, Laser, Microneedling..."
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600 min-h-24"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lead_treatment" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      WHICH TREATMENT SHOULD WE LEAD WITH FIRST? *
+                    </Label>
+                    <Input
+                      id="lead_treatment"
+                      name="lead_treatment"
+                      value={formData.lead_treatment}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Botox"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lead_treatment_price" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      PRICE FOR THE LEAD TREATMENT *
+                    </Label>
+                    <Input
+                      id="lead_treatment_price"
+                      name="lead_treatment_price"
+                      value={formData.lead_treatment_price}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 2500 SEK"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="popular_package" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      MOST POPULAR PACKAGE
+                    </Label>
+                    <Textarea
+                      id="popular_package"
+                      name="popular_package"
+                      value={formData.popular_package}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Gold Package: Botox + Fillers + Laser - 5000 SEK"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600 min-h-20"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Step 4 */}
+              {currentStep === 4 && (
+                <>
+                  <div>
+                    <Label htmlFor="practitioners" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      HOW MANY PRACTITIONERS? *
+                    </Label>
+                    <Input
+                      id="practitioners"
+                      name="practitioners"
+                      type="number"
+                      value={formData.practitioners}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 3"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="max_clients_per_day" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      MAX CLIENTS PER DAY *
+                    </Label>
+                    <Input
+                      id="max_clients_per_day"
+                      name="max_clients_per_day"
+                      type="number"
+                      value={formData.max_clients_per_day}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 15"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="calendar_fullness" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      HOW FULL IS YOUR CALENDAR RIGHT NOW? *
+                    </Label>
+                    <Select value={formData.calendar_fullness} onValueChange={(value) => handleSelectChange("calendar_fullness", value)}>
+                      <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                        <SelectValue placeholder="Select..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-900 border-gray-700">
+                        <SelectItem value="empty">Empty - lots of availability</SelectItem>
+                        <SelectItem value="moderate">Moderate - some availability</SelectItem>
+                        <SelectItem value="full">Full - limited availability</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+
+              {/* Step 5 */}
+              {currentStep === 5 && (
+                <>
+                  <div>
+                    <Label htmlFor="brand_colors" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      BRAND COLOURS (HEX CODES OR "SEE WEBSITE") *
+                    </Label>
+                    <Input
+                      id="brand_colors"
+                      name="brand_colors"
+                      value={formData.brand_colors}
+                      onChange={handleInputChange}
+                      placeholder="#FF6B35, #FFB703 or 'see website'"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="logo_url" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      UPLOAD YOUR LOGO (URL)
+                    </Label>
+                    <Input
+                      id="logo_url"
+                      name="logo_url"
+                      value={formData.logo_url}
+                      onChange={handleInputChange}
+                      placeholder="https://..."
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="assets_drive_link" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      GOOGLE DRIVE LINK WITH PHOTOS, VIDEOS, BEFORE/AFTERS
+                    </Label>
+                    <Input
+                      id="assets_drive_link"
+                      name="assets_drive_link"
+                      value={formData.assets_drive_link}
+                      onChange={handleInputChange}
+                      placeholder="https://drive.google.com/drive/folders/..."
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Step 6 */}
+              {currentStep === 6 && (
+                <>
+                  <div>
+                    <Label htmlFor="company_name" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      REGISTERED COMPANY NAME *
+                    </Label>
+                    <Input
+                      id="company_name"
+                      name="company_name"
+                      value={formData.company_name}
+                      onChange={handleInputChange}
+                      placeholder="e.g., Beauty Clinic AB"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="org_number" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      ORGANISATION NUMBER *
+                    </Label>
+                    <Input
+                      id="org_number"
+                      name="org_number"
+                      value={formData.org_number}
+                      onChange={handleInputChange}
+                      placeholder="e.g., 556970-3050"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="billing_email" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      BILLING EMAIL *
+                    </Label>
+                    <Input
+                      id="billing_email"
+                      name="billing_email"
+                      type="email"
+                      value={formData.billing_email}
+                      onChange={handleInputChange}
+                      placeholder="billing@clinic.se"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="billing_address" className="text-xs tracking-widest text-gray-400 mb-3 block">
+                      BILLING ADDRESS *
+                    </Label>
+                    <Textarea
+                      id="billing_address"
+                      name="billing_address"
+                      value={formData.billing_address}
+                      onChange={handleInputChange}
+                      placeholder="Strandvägen 1, 114 51 Stockholm, Sweden"
+                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600 min-h-20"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Navigation */}
+            <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-800">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 1}
+                className="text-xs tracking-widest text-gray-500 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                ← BACK
+              </button>
+
+              {currentStep === 6 ? (
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="px-8 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-black font-medium transition-colors flex items-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      SUBMITTING...
+                    </>
+                  ) : (
+                    "SUBMIT →"
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={handleNext}
+                  className="px-8 py-3 bg-yellow-600 hover:bg-yellow-700 text-black font-medium transition-colors"
+                >
+                  CONTINUE →
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
