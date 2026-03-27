@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 const WEBHOOK_URL = "https://8765-i6abb8hfxkb9s3w04yftb-6c22dd36.us2.manus.computer/onboard";
+const STORAGE_KEY = "glow_onboarding_form";
 
 const steps = [
   { id: 1, label: "Clinic Info" },
@@ -24,7 +25,17 @@ export default function OnboardingForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  const [formData, setFormData] = useState({
+  // Initialize form data from localStorage or defaults
+  const [formData, setFormData] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved form data", e);
+      }
+    }
+    return {
     clinic_name: "",
     contact_name: "",
     email: "",
@@ -49,15 +60,34 @@ export default function OnboardingForm() {
     org_number: "",
     billing_email: "",
     billing_address: "",
+  };
   });
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  }, [formData]);
+
+  // Save current step to localStorage
+  useEffect(() => {
+    localStorage.setItem(`${STORAGE_KEY}_step`, currentStep.toString());
+  }, [currentStep]);
+
+  // Restore current step from localStorage on mount
+  useEffect(() => {
+    const savedStep = localStorage.getItem(`${STORAGE_KEY}_step`);
+    if (savedStep) {
+      setCurrentStep(parseInt(savedStep, 10));
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const validateStep = (step: number): boolean => {
@@ -118,6 +148,9 @@ export default function OnboardingForm() {
       }
 
       setSubmitted(true);
+      // Clear saved form data after successful submission
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(`${STORAGE_KEY}_step`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit form");
     } finally {
@@ -137,6 +170,12 @@ export default function OnboardingForm() {
           <p className="text-sm text-gray-500">
             Our team will be in touch shortly to schedule your onboarding call.
           </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-8 text-xs tracking-widest text-yellow-600 hover:text-yellow-500 transition-colors"
+          >
+            START NEW SUBMISSION
+          </button>
         </div>
       </div>
     );
