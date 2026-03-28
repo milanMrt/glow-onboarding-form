@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
-const WEBHOOK_URL = "https://8765-i6abb8hfxkb9s3w04yftb-6c22dd36.us2.manus.computer/onboard";
+const WEBHOOK_URL = "https://glow-onboarding-production.up.railway.app/onboard";
 const STORAGE_KEY = "glow_onboarding_form";
 
 const steps = [
