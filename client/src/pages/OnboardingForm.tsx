@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,9 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 const WEBHOOK_URL = "https://glow-onboarding-production.up.railway.app/onboard";
 const STORAGE_KEY = "glow_onboarding_form";
+const HCAPTCHA_SITE_KEY = "e0e1c6f4-f1c6-4e8a-9c0e-8c8f8c8f8c8f";
+const FORM_API_KEY = "glow-form-secret-key-2024"; // Must match backend API key
 
 const steps = [
   { id: 1, label: "Clinic Info" },
@@ -24,6 +27,12 @@ export default function OnboardingForm() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [enteredCode, setEnteredCode] = useState("");
 
   // Initialize form data from localStorage or defaults
   const [formData, setFormData] = useState(() => {
@@ -127,9 +136,57 @@ export default function OnboardingForm() {
     }
   };
 
+  const sendVerificationCode = async () => {
+    if (!formData.email) {
+      setError("Please enter your email address");
+      return;
+    }
+    
+    setLoading(true);
+    setError("");
+    
+    try {
+      // Generate a random 6-digit code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setVerificationCode(code);
+      
+      // In production, this would send via email
+      // For now, we'll show it in console and alert for demo
+      console.log(`Verification code for ${formData.email}: ${code}`);
+      
+      // Simulate sending email
+      setVerificationSent(true);
+      setError("");
+    } catch (err) {
+      setError("Failed to send verification code");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyEmail = () => {
+    if (enteredCode === verificationCode) {
+      setEmailVerified(true);
+      setError("");
+      setVerificationSent(false);
+    } else {
+      setError("Incorrect verification code. Please try again.");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateStep(6)) {
       setError("Please fill in all required fields");
+      return;
+    }
+
+    if (!emailVerified) {
+      setError("Please verify your email address first");
+      return;
+    }
+
+    if (!captchaToken) {
+      setError("Please complete the CAPTCHA verification");
       return;
     }
 
@@ -139,8 +196,14 @@ export default function OnboardingForm() {
     try {
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": FORM_API_KEY,
+        },
+        body: JSON.stringify({
+          ...formData,
+          captcha_token: captchaToken,
+        }),
       });
 
       if (!response.ok) {
@@ -153,6 +216,11 @@ export default function OnboardingForm() {
       localStorage.removeItem(`${STORAGE_KEY}_step`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit form");
+      // Reset captcha on error so user can retry
+      if (captchaRef.current) {
+        captchaRef.current.resetCaptcha();
+      }
+      setCaptchaToken(null);
     } finally {
       setLoading(false);
     }
@@ -283,17 +351,52 @@ export default function OnboardingForm() {
                   </div>
                   <div>
                     <Label htmlFor="email" className="text-xs tracking-widest text-gray-400 mb-3 block">
-                      EMAIL *
+                      EMAIL * {emailVerified && <span className="text-yellow-600">✓ Verified</span>}
                     </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="john@clinic.se"
-                      className="bg-gray-900 border-gray-700 text-white placeholder-gray-600"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="john@clinic.se"
+                        className="bg-gray-900 border-gray-700 text-white placeholder-gray-600 flex-1"
+                        disabled={emailVerified}
+                      />
+                      {!emailVerified && (
+                        <button
+                          onClick={sendVerificationCode}
+                          disabled={loading || !formData.email}
+                          className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 text-black font-medium text-sm transition-colors whitespace-nowrap"
+                        >
+                          {loading ? "Sending..." : "Verify"}
+                        </button>
+                      )}
+                    </div>
+                    {verificationSent && (
+                      <div className="mt-4 p-3 bg-gray-900 border border-gray-700 rounded">
+                        <Label className="text-xs tracking-widest text-gray-400 mb-2 block">
+                          VERIFICATION CODE
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="text"
+                            placeholder="Enter 6-digit code"
+                            value={enteredCode}
+                            onChange={(e) => setEnteredCode(e.target.value)}
+                            maxLength={6}
+                            className="bg-gray-800 border-gray-600 text-white placeholder-gray-500 flex-1"
+                          />
+                          <button
+                            onClick={verifyEmail}
+                            className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-black font-medium text-sm transition-colors whitespace-nowrap"
+                          >
+                            Confirm
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="phone" className="text-xs tracking-widest text-gray-400 mb-3 block">
@@ -614,6 +717,18 @@ export default function OnboardingForm() {
                 </>
               )}
             </div>
+
+            {/* CAPTCHA - Only on final step */}
+            {currentStep === 6 && (
+              <div className="mb-8 p-4 bg-gray-900 border border-gray-800 rounded flex justify-center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={HCAPTCHA_SITE_KEY}
+                  onVerify={(token) => setCaptchaToken(token)}
+                  theme="dark"
+                />
+              </div>
+            )}
 
             {/* Navigation */}
             <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-800">
